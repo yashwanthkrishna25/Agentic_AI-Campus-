@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function role() { return signedIn() ? request.auth.token.role : null; }
+    function isAdmin() { return role() == 'ADMIN'; }
+    function isFaculty() { return role() == 'FACULTY' || role() == 'HOD' || role() == 'PRINCIPAL' || isAdmin(); }
+    function own(uid) { return signedIn() && request.auth.uid == uid; }
+
+    // Role claims must be set by a trusted Admin SDK backend, never by the mobile client.
+    match /users/{uid} {
+      allow read: if own(uid) || isAdmin();
+      allow create: if own(uid) && request.resource.data.uid == uid
+        && request.resource.data.role in ['STUDENT', 'PARENT']
+        && request.resource.data.status == 'PENDING';
+      allow update: if (own(uid) && request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['displayName', 'phone', 'photoUrl', 'updatedAt'])) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /attendanceRecords/{recordId} {
+      allow read: if signedIn() && (resource.data.studentUid == request.auth.uid || isFaculty());
+      allow create, update: if isFaculty() && request.resource.data.markedBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+    match /attendanceLogs/{logId} {
+      allow read: if signedIn() && (resource.data.studentUid == request.auth.uid || isFaculty());
+      allow create: if isFaculty() && request.resource.data.markedBy == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+    match /studentMarks/{markId} {
+      allow read: if signedIn() && (resource.data.studentUid == request.auth.uid || isFaculty());
+      allow create, update: if isFaculty();
+      allow delete: if isAdmin();
+    }
+    match /campusDocuments/{docId} {
+      allow read: if signedIn() && (resource.data.visibility == 'PUBLIC' || isFaculty() || (resource.data.keys().hasAny(['allowedUids']) && resource.data.allowedUids is list && resource.data.allowedUids.hasAny([request.auth.uid])));
+      allow create: if isFaculty() && request.resource.data.uploadedBy == request.auth.uid;
+      allow update: if isFaculty() && resource.data.uploadedBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+    match /colleges/{id} { allow read: if signedIn(); allow write: if isAdmin(); }
+    match /departments/{id} { allow read: if signedIn(); allow write: if isAdmin() || role() == 'HOD'; }
+    match /systemAlerts/{id} { allow read: if signedIn(); allow create, update: if isFaculty(); allow delete: if isAdmin(); }
+    match /attendanceSessions/{id} { allow read: if signedIn(); allow create, update: if isFaculty(); allow delete: if isAdmin(); }
+    match /faceEnrollmentMetadata/{uid} { allow read, write: if own(uid) || isAdmin(); }
+    match /protectedFaceTemplates/{uid} { allow read, write: if false; }
+    match /auditLogs/{id} { allow read: if isAdmin(); allow write: if false; }
+    // Everything else is denied until a narrowly scoped rule is explicitly added.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_emerald">#00F5D4</color>
+    <color name="primary_indigo">#6366F1</color>
+    <color name="bg_obsidian">#080E1E</color>
+    <color name="surface_obsidian">#0F1A30</color>
+    <color name="amber_warning">#FBBF24</color>
+    <color name="coral_risk">#F43F5E</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+</resources>

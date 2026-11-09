@@ -1,0 +1,150 @@
+{
+  "entities": {
+    "College": {
+      "title": "College",
+      "description": "Represents an institution or college managed by an Administrator",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "city": { "type": "string" },
+        "adminEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "name", "code", "adminEmail"]
+    },
+    "Department": {
+      "title": "Department",
+      "description": "An academic department in a college overseen by an HOD",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "collegeId": { "type": "string" },
+        "name": { "type": "string" },
+        "code": { "type": "string" },
+        "hodName": { "type": "string" },
+        "hodEmail": { "type": "string" }
+      },
+      "required": ["id", "collegeId", "name", "code", "hodName"]
+    },
+    "AttendanceRecord": {
+      "title": "AttendanceRecord",
+      "description": "Session attendance log recorded by faculty or automated scan",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "collegeId": { "type": "string" },
+        "deptId": { "type": "string" },
+        "subjectCode": { "type": "string" },
+        "subjectName": { "type": "string" },
+        "periodNumber": { "type": "integer" },
+        "date": { "type": "string" },
+        "markedBy": { "type": "string" },
+        "markedByRole": { "type": "string" },
+        "method": { "type": "string" },
+        "presentCount": { "type": "integer" },
+        "totalStudents": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "subjectName", "date", "markedBy", "method"]
+    },
+    "CampusDocument": {
+      "title": "CampusDocument",
+      "description": "A drive document or PDF saved in a campus folder",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "collegeId": { "type": "string" },
+        "title": { "type": "string" },
+        "folderName": { "type": "string" },
+        "fileType": { "type": "string" },
+        "sizeFormatted": { "type": "string" },
+        "downloadUrl": { "type": "string" },
+        "uploadedBy": { "type": "string" },
+        "uploadedByRole": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "folderName", "fileType", "uploadedBy"]
+    },
+    "SystemAlert": {
+      "title": "SystemAlert",
+      "description": "System issues, bug reports, and low-attendance alerts for Admin and Principals",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "collegeId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "category": { "type": "string" },
+        "severity": { "type": "string" },
+        "isResolved": { "type": "boolean" },
+        "reportedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "title", "message", "category", "severity"]
+    },
+    "UserDocument": {
+      "title": "UserDocument",
+      "description": "User profile with role-based access ('Admin', 'Faculty', 'Student', 'Parent')",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["ADMIN", "FACULTY", "STUDENT", "PARENT", "HOD", "PRINCIPAL"] },
+        "department": { "type": "string" },
+        "rollNumber": { "type": "string" },
+        "studentId": { "type": "string" },
+        "collegeId": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "AttendanceLog": {
+      "title": "AttendanceLog",
+      "description": "Classroom QR attendance record scanned via CameraX and ZXing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "subjectCode": { "type": "string" },
+        "subjectName": { "type": "string" },
+        "sessionToken": { "type": "string" },
+        "status": { "type": "string" },
+        "verificationMethod": { "type": "string" }
+      },
+      "required": ["studentId", "subjectCode", "sessionToken", "status"]
+    }
+  },
+  "firestore": {
+    "/colleges/{collegeId}": {
+      "schema": { "$ref": "#/entities/College" },
+      "description": "College institutions created and managed by Administrators"
+    },
+    "/departments/{deptId}": {
+      "schema": { "$ref": "#/entities/Department" },
+      "description": "Academic branches and HOD directory"
+    },
+    "/attendanceRecords/{recordId}": {
+      "schema": { "$ref": "#/entities/AttendanceRecord" },
+      "description": "Campus session attendance records"
+    },
+    "/campusDocuments/{docId}": {
+      "schema": { "$ref": "#/entities/CampusDocument" },
+      "description": "Campus Drive documents organized in user-created folders"
+    },
+    "/systemAlerts/{alertId}": {
+      "schema": { "$ref": "#/entities/SystemAlert" },
+      "description": "Admin operational issues and low-attendance warnings"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserDocument" },
+      "description": "User profiles and role claims distinguishing Admin, Faculty, Student, and Parent"
+    },
+    "/attendanceLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AttendanceLog" },
+      "description": "QR classroom scan attendance logs pushed to Firestore"
+    }
+  }
+}

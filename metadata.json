@@ -1,0 +1,6 @@
+{
+  "name": "AGENTRA AI CAMPUS",
+  "description": "AGENTRA AI CAMPUS - Multi-Role Enterprise Campus Intelligence & Academic Operations System with Live Firestore Cloud, Super Admin, System Admin, Principal, HOD, Faculty, and Student Portals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
